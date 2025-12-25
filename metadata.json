@@ -1,0 +1,5 @@
+{
+  "name": "ScriptAI - Persona Agent",
+  "description": "An intelligent video script writing agent that manages user personas and generates platform-specific content (TikTok, YouTube, RedNote, etc.) based on stylistic analysis of text and images.",
+  "requestFramePermissions": []
+}
