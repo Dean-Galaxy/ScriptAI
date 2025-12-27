@@ -53,7 +53,8 @@ Desktop.ini
 *.cache
 .cache
 
-# Package manager lock files (可选，根据团队需求决定是否提交)
+# Package manager lock files
+# 如果需要使用 npm ci 和缓存，请取消下面的注释，并运行 npm install 生成 package-lock.json
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
