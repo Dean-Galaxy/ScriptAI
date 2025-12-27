@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, Sparkles, Trash2, Plus, check, AlertCircle, User } from 'lucide-react';
+import { Upload, Sparkles, Trash2, Plus, AlertCircle, User } from 'lucide-react';
 import { PersonaProfile } from '../types';
 import { analyzePersona } from '../services/geminiService';
 
