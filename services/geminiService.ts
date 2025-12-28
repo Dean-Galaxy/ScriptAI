@@ -1,10 +1,10 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { PersonaProfile, Platform } from "../types";
 
 // 延迟初始化，只在需要时创建实例
-let ai: GoogleGenAI | null = null;
+let ai: GoogleGenerativeAI | null = null;
 
-const getAI = (): GoogleGenAI => {
+const getAI = (): GoogleGenerativeAI => {
   if (!ai) {
     // 统一使用 import.meta.env.VITE_GEMINI_API_KEY
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -16,7 +16,7 @@ const getAI = (): GoogleGenAI => {
     }
     
     console.log("Initializing GoogleGenAI with API key (length:", apiKey.length, ")");
-    ai = new GoogleGenAI(apiKey); // 注意：这里根据你引用的库版本，可能直接传字符串，也可能传对象 { apiKey }
+    ai = new GoogleGenerativeAI(apiKey); // 注意：这里根据你引用的库版本，可能直接传字符串，也可能传对象 { apiKey }
   }
   return ai;
 };
@@ -71,18 +71,25 @@ export const analyzePersona = async (
     Extract their style profile according to the system instructions.`;
 
     // 调用 Gemini API
-    const response = await aiInstance.models.generateContent({
-      model: 'gemini-1.5-flash',
-      contents: {
-        parts: [imagePart, { text: prompt }]
-      },
-      config: {
-        systemInstruction: PERSONA_SYSTEM_PROMPT,
-        responseMimeType: "application/json"
-      }
+    // 第一步：先获取模型实例（指定你要用的模型名称）
+    const model = aiInstance.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      // 如果你有系统指令，放在这里
+      systemInstruction: PERSONA_SYSTEM_PROMPT, 
     });
 
-    const jsonText = response.text || "{}";
+    // 第二步：通过模型实例调用 generateContent
+    // 修正后的调用方式：直接传入一个数组，不需要外层包裹 { contents: ... }
+    const result = await model.generateContent([
+      imagePart,           // 图片部分
+      { text: prompt }     // 文字部分
+    ]);
+
+    // 然后获取响应
+    const response = await result.response;
+    const text = response.text();
+
+    const jsonText = (typeof response.text === 'function' ? response.text() : response.text) || "{}";
     let analysisData;
     try {
         analysisData = JSON.parse(jsonText);
@@ -154,6 +161,7 @@ export const generateScript = async (
   topic: string,
   mode: 'rewrite' | 'create'
 ): Promise<string> => {
+  // 注意：这里我们只用一个 try-catch，结构更清晰
   try {
     const aiInstance = getAI();
     
@@ -177,19 +185,21 @@ export const generateScript = async (
     Please generate the full response following the standard output format.
     `;
 
-    // 调用 Gemini API 生成脚本
-    const response = await aiInstance.models.generateContent({
+    // 1. 获取模型实例
+    const model = aiInstance.getGenerativeModel({ 
       model: 'gemini-1.5-flash',
-      contents: prompt,
-      config: {
-        systemInstruction: SCRIPT_SYSTEM_PROMPT
-      }
+      systemInstruction: SCRIPT_SYSTEM_PROMPT 
     });
 
-    return response.text || "Failed to generate script.";
+    // 2. 调用 generateContent
+    const result = await model.generateContent(prompt);
+
+    // 3. 等待响应并调用 .text() 方法
+    const response = await result.response;
+    return response.text() || "Failed to generate script.";
 
   } catch (error) {
     console.error("Script Generation Error:", error);
     throw new Error("Failed to generate script.");
-  }
-};
+  } 
+}; // <-- 这一行补齐了函数的结束括号
