@@ -8,7 +8,9 @@ const getAI = (): GoogleGenerativeAI => {
   if (!ai) {
     // 统一使用 import.meta.env.VITE_GEMINI_API_KEY
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    
+    // 添加这行，部署后看控制台输出的长度对不对
+    console.log("Current API Key Length:", apiKey ? apiKey.length : "empty");
+
     if (!apiKey) {
       // 这里的 log 也同步修改，方便你调试时看提示
       console.error("API Key check failed. VITE_GEMINI_API_KEY is missing.");
@@ -16,7 +18,7 @@ const getAI = (): GoogleGenerativeAI => {
     }
     
     console.log("Initializing GoogleGenAI with API key (length:", apiKey.length, ")");
-    ai = new GoogleGenerativeAI({ apiKey, apiVersion: 'v1' } as any); // 注意：这里根据你引用的库版本，可能直接传字符串，也可能传对象 { apiKey }
+    ai = new GoogleGenerativeAI(apiKey); // 注意：这里根据你引用的库版本，可能直接传字符串，也可能传对象 { apiKey }
   }
   return ai;
 };
@@ -117,7 +119,7 @@ export const analyzePersona = async (
     // 提供更详细的错误信息
     const errorMessage = error?.message || error?.toString() || "Unknown error";
     if (errorMessage.includes("API Key") || errorMessage.includes("apiKey")) {
-      throw new Error("API Key 未配置或无效。请检查环境变量 GEMINI_API_KEY。");
+      throw new Error("API Key 未配置或无效。请检查环境变量 VITE_GEMINI_API_KEY。");
     }
     if (errorMessage.includes("network") || errorMessage.includes("fetch")) {
       throw new Error("网络连接失败。请检查您的网络连接。");
