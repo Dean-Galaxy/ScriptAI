@@ -77,7 +77,7 @@ export const analyzePersona = async (
 
     // 3. 获取模型实例（注意：删掉了 systemInstruction 参数）
     const model = (aiInstance as any).getGenerativeModel(
-      { model: "gemini-1.5-pro" },
+      { model: "gemini-2.5-flash" },
       { apiVersion: 'v1beta' }
     );
 
@@ -191,7 +191,7 @@ export const generateScript = async (
 
     // 1. 获取模型实例
     const model = aiInstance.getGenerativeModel({ 
-      model: 'gemini-1.5-pro'
+      model: 'gemini-2.5-flash'
     },
     { apiVersion: 'v1beta' } as any // 重点：把版本配置放在第二个参数
     );
