@@ -56,10 +56,10 @@ export const analyzePersona = async (
   try {
     const aiInstance = getAI();
     
-    // 检测图片 MIME 类型
+    // 1. 处理图片 (这部分保持不变)
     const mimeType = imageDataUrl.startsWith('data:image/png') ? 'image/png' : 
                      imageDataUrl.startsWith('data:image/jpeg') || imageDataUrl.startsWith('data:image/jpg') ? 'image/jpeg' :
-                     'image/jpeg'; // 默认为 jpeg
+                     'image/jpeg';
 
     const imagePart = {
       inlineData: {
@@ -68,32 +68,30 @@ export const analyzePersona = async (
       },
     };
 
-    const prompt = `Analyze this person's style. 
+    // 2. 构造用户具体的请求内容
+    const userPrompt = `Analyze this person's style. 
     Name: ${name}
     Text Sample: "${textSample}"
     
-    Extract their style profile according to the system instructions.`;
+    Extract their style profile according to the instructions above.`;
 
-    // 调用 Gemini API
-    // 第一步：先获取模型实例（指定你要用的模型名称）
-    const model = aiInstance.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      // 如果你有系统指令，放在这里
-      systemInstruction: PERSONA_SYSTEM_PROMPT
-    },
-    { apiVersion: 'v1' } as any // 重点：把版本配置放在第二个参数
+    // 3. 获取模型实例（注意：删掉了 systemInstruction 参数）
+    const model = (aiInstance as any).getGenerativeModel(
+      { model: "gemini-1.5-flash" },
+      { apiVersion: 'v1' }
     );
 
-    // 第二步：通过模型实例调用 generateContent
-    // 修正后的调用方式：直接传入一个数组，不需要外层包裹 { contents: ... }
+    // 4. 调用生成（手动合并：把 PERSONA_SYSTEM_PROMPT 作为第一段文本传入）
     const result = await model.generateContent([
-      imagePart,           // 图片部分
-      { text: prompt }     // 文字部分
+      { text: PERSONA_SYSTEM_PROMPT }, // 第一部分：你的身份和规则说明
+      imagePart,                       // 第二部分：图片
+      { text: userPrompt }             // 第三部分：具体的任务请求
     ]);
 
-    // 然后获取响应
+    // 后续处理...
     const response = await result.response;
     const text = response.text();
+    // ...
 
     const jsonText = (typeof response.text === 'function' ? response.text() : response.text) || "{}";
     let analysisData;
@@ -193,14 +191,14 @@ export const generateScript = async (
 
     // 1. 获取模型实例
     const model = aiInstance.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
-      systemInstruction: SCRIPT_SYSTEM_PROMPT 
+      model: 'gemini-1.5-flash'
     },
     { apiVersion: 'v1' } as any // 重点：把版本配置放在第二个参数
     );
 
     // 2. 调用 generateContent
-    const result = await model.generateContent(prompt);
+    const fullPrompt = `${SCRIPT_SYSTEM_PROMPT}\n\n以下是需要分析的内容：\n${prompt}`;
+    const result = await model.generateContent(fullPrompt);
 
     // 3. 等待响应并调用 .text() 方法
     const response = await result.response;
