@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI} from "@google/generative-ai";
 import { PersonaProfile, Platform } from "../types";
 
 // 延迟初始化，只在需要时创建实例
@@ -16,7 +16,7 @@ const getAI = (): GoogleGenerativeAI => {
     }
     
     console.log("Initializing GoogleGenAI with API key (length:", apiKey.length, ")");
-    ai = new GoogleGenerativeAI(apiKey); // 注意：这里根据你引用的库版本，可能直接传字符串，也可能传对象 { apiKey }
+    ai = new GoogleGenerativeAI({ apiKey, apiVersion: 'v1' } as any); // 注意：这里根据你引用的库版本，可能直接传字符串，也可能传对象 { apiKey }
   }
   return ai;
 };
@@ -73,7 +73,7 @@ export const analyzePersona = async (
     // 调用 Gemini API
     // 第一步：先获取模型实例（指定你要用的模型名称）
     const model = aiInstance.getGenerativeModel({ 
-      model: "models/gemini-1.5-flash",
+      model: "gemini-1.5-flash",
       // 如果你有系统指令，放在这里
       systemInstruction: PERSONA_SYSTEM_PROMPT, 
     });
@@ -187,7 +187,7 @@ export const generateScript = async (
 
     // 1. 获取模型实例
     const model = aiInstance.getGenerativeModel({ 
-      model: 'models/gemini-1.5-flash',
+      model: 'gemini-1.5-flash',
       systemInstruction: SCRIPT_SYSTEM_PROMPT 
     });
 
