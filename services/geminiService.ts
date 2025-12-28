@@ -209,3 +209,29 @@ export const generateScript = async (
     throw new Error("Failed to generate script.");
   } 
 }; // <-- 这一行补齐了函数的结束括号
+
+// --- 调试专用代码 ---
+export const debugListModels = async () => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  console.log("正在查询可用模型列表...");
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    const data = await response.json();
+    console.log("=== Google 官方返回的可用模型列表 ===");
+    console.log(data);
+    
+    if (data.models) {
+      console.log("建议尝试使用的模型名称：");
+      data.models.forEach((m: any) => {
+        if (m.supportedGenerationMethods.includes("generateContent")) {
+          console.log(`- ${m.name.replace('models/', '')}`);
+        }
+      });
+    }
+  } catch (e) {
+    console.error("查询失败:", e);
+  }
+};
+
+// 为了方便触发，把它挂载到 window 对象上
+(window as any).checkModels = debugListModels;
