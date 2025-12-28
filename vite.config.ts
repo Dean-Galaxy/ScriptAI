@@ -23,6 +23,19 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
-      }
+      },
+      build: {
+        // 提高 chunk 大小警告限制（当前 594KB，压缩后 156KB 是可以接受的）
+        chunkSizeWarningLimit: 600,
+        rollupOptions: {
+          output: {
+            // 将 vendor 库单独打包
+            manualChunks: {
+              'react-vendor': ['react', 'react-dom'],
+              'google-ai': ['@google/genai'],
+            },
+          },
+        },
+      },
     };
 });

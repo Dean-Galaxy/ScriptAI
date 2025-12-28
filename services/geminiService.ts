@@ -1,7 +1,19 @@
 import { GoogleGenAI } from "@google/genai";
 import { PersonaProfile, Platform } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// 延迟初始化，只在需要时创建实例
+let ai: GoogleGenAI | null = null;
+
+const getAI = (): GoogleGenAI => {
+  if (!ai) {
+    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("API Key is not configured. Please set GEMINI_API_KEY in your environment variables.");
+    }
+    ai = new GoogleGenAI({ apiKey });
+  }
+  return ai;
+};
 
 // Helper to convert base64 string to clean data for sending
 const cleanBase64 = (dataUrl: string) => {
@@ -32,6 +44,8 @@ export const analyzePersona = async (
   imageDataUrl: string
 ): Promise<PersonaProfile> => {
   try {
+    const aiInstance = getAI();
+    
     const imagePart = {
       inlineData: {
         mimeType: 'image/jpeg', // Assuming jpeg/png handling
@@ -45,7 +59,7 @@ export const analyzePersona = async (
     
     Extract their style profile according to the system instructions.`;
 
-    const response = await ai.models.generateContent({
+    const response = await aiInstance.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: {
         parts: [imagePart, { text: prompt }]
@@ -121,6 +135,8 @@ export const generateScript = async (
   mode: 'rewrite' | 'create'
 ): Promise<string> => {
   try {
+    const aiInstance = getAI();
+    
     const prompt = `
     TASK: ${mode === 'rewrite' ? 'Rewrite the provided text' : 'Create a new script from topic'}
     TARGET PLATFORM: ${platform}
@@ -141,7 +157,7 @@ export const generateScript = async (
     Please generate the full response following the standard output format.
     `;
 
-    const response = await ai.models.generateContent({
+    const response = await aiInstance.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
