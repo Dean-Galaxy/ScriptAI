@@ -8,6 +8,8 @@ const getAI = (): GoogleGenerativeAI => {
   if (!ai) {
     // 统一使用 import.meta.env.VITE_GEMINI_API_KEY
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    // 加这行！！！如果网页控制台没打印出 "V3-DEPLOY-CHECK"，说明代码没更新成功
+    console.log("V3-DEPLOY-CHECK: Version V1 manual force");
     // 添加这行，部署后看控制台输出的长度对不对
     console.log("Current API Key Length:", apiKey ? apiKey.length : "empty");
 
@@ -75,7 +77,7 @@ export const analyzePersona = async (
     // 调用 Gemini API
     // 第一步：先获取模型实例（指定你要用的模型名称）
     const model = aiInstance.getGenerativeModel({ 
-      model: "v1/gemini-1.5-flash",
+      model: "gemini-pro",
       // 如果你有系统指令，放在这里
       systemInstruction: PERSONA_SYSTEM_PROMPT, 
     });
@@ -189,7 +191,7 @@ export const generateScript = async (
 
     // 1. 获取模型实例
     const model = aiInstance.getGenerativeModel({ 
-      model: 'v1/gemini-1.5-flash',
+      model: 'gemini-pro',
       systemInstruction: SCRIPT_SYSTEM_PROMPT 
     });
 
