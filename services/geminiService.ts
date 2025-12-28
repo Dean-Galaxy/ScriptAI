@@ -6,13 +6,17 @@ let ai: GoogleGenAI | null = null;
 
 const getAI = (): GoogleGenAI => {
   if (!ai) {
-    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+    // 统一使用 import.meta.env.VITE_GEMINI_API_KEY
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    
     if (!apiKey) {
-      console.error("API Key check failed. process.env.API_KEY:", process.env.API_KEY, "process.env.GEMINI_API_KEY:", process.env.GEMINI_API_KEY);
-      throw new Error("API Key 未配置。请在环境变量中设置 GEMINI_API_KEY，或在 GitHub Pages 部署时配置 Secrets。");
+      // 这里的 log 也同步修改，方便你调试时看提示
+      console.error("API Key check failed. VITE_GEMINI_API_KEY is missing.");
+      throw new Error("API Key 未配置。请在 .env 文件中设置 VITE_GEMINI_API_KEY,或在 GitHub Secrets 中配置。");
     }
+    
     console.log("Initializing GoogleGenAI with API key (length:", apiKey.length, ")");
-    ai = new GoogleGenAI({ apiKey });
+    ai = new GoogleGenAI(apiKey); // 注意：这里根据你引用的库版本，可能直接传字符串，也可能传对象 { apiKey }
   }
   return ai;
 };

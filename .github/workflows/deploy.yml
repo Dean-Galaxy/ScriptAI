@@ -34,7 +34,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VITE_GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           # GitHub Pages base 路径：如果仓库名不是 username.github.io，设置为 '/repository-name/'
           # 当前仓库名为 ScriptAI，所以路径为 /ScriptAI/
           VITE_BASE: '/ScriptAI/'
