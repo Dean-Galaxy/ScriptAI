@@ -75,7 +75,7 @@ export const analyzePersona = async (
     // 调用 Gemini API
     // 第一步：先获取模型实例（指定你要用的模型名称）
     const model = aiInstance.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "v1/gemini-1.5-flash",
       // 如果你有系统指令，放在这里
       systemInstruction: PERSONA_SYSTEM_PROMPT, 
     });
@@ -189,7 +189,7 @@ export const generateScript = async (
 
     // 1. 获取模型实例
     const model = aiInstance.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
+      model: 'v1/gemini-1.5-flash',
       systemInstruction: SCRIPT_SYSTEM_PROMPT 
     });
 
