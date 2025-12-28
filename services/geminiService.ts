@@ -77,10 +77,12 @@ export const analyzePersona = async (
     // 调用 Gemini API
     // 第一步：先获取模型实例（指定你要用的模型名称）
     const model = aiInstance.getGenerativeModel({ 
-      model: "gemini-pro",
+      model: "gemini-1.5-flash",
       // 如果你有系统指令，放在这里
-      systemInstruction: PERSONA_SYSTEM_PROMPT, 
-    });
+      systemInstruction: PERSONA_SYSTEM_PROMPT
+    },
+    { apiVersion: 'v1' } as any // 重点：把版本配置放在第二个参数
+    );
 
     // 第二步：通过模型实例调用 generateContent
     // 修正后的调用方式：直接传入一个数组，不需要外层包裹 { contents: ... }
@@ -191,9 +193,11 @@ export const generateScript = async (
 
     // 1. 获取模型实例
     const model = aiInstance.getGenerativeModel({ 
-      model: 'gemini-pro',
+      model: 'gemini-1.5-flash',
       systemInstruction: SCRIPT_SYSTEM_PROMPT 
-    });
+    },
+    { apiVersion: 'v1' } as any // 重点：把版本配置放在第二个参数
+    );
 
     // 2. 调用 generateContent
     const result = await model.generateContent(prompt);
