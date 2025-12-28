@@ -78,7 +78,7 @@ export const analyzePersona = async (
     // 3. 获取模型实例（注意：删掉了 systemInstruction 参数）
     const model = (aiInstance as any).getGenerativeModel(
       { model: "gemini-1.5-flash" },
-      { apiVersion: 'v1' }
+      { apiVersion: 'v1beta' }
     );
 
     // 4. 调用生成（手动合并：把 PERSONA_SYSTEM_PROMPT 作为第一段文本传入）
@@ -193,7 +193,7 @@ export const generateScript = async (
     const model = aiInstance.getGenerativeModel({ 
       model: 'gemini-1.5-flash'
     },
-    { apiVersion: 'v1' } as any // 重点：把版本配置放在第二个参数
+    { apiVersion: 'v1beta' } as any // 重点：把版本配置放在第二个参数
     );
 
     // 2. 调用 generateContent
