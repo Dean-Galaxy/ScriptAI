@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Play, Copy, RefreshCw, ChevronRight, Video, Youtube, MessageCircle, FileText } from 'lucide-react';
 import { PersonaProfile, Platform } from '../types';
 import { generateScript } from '../services/geminiService';
+import { useLocalStorage } from '../src/hooks/useLocalStorage';
 
 interface ScriptGeneratorProps {
   personas: PersonaProfile[];
@@ -10,12 +11,22 @@ interface ScriptGeneratorProps {
 }
 
 export const ScriptGenerator: React.FC<ScriptGeneratorProps> = ({ personas, initialPersona }) => {
-  const [selectedPersonaId, setSelectedPersonaId] = useState<string>(initialPersona?.id || '');
-  const [platform, setPlatform] = useState<Platform>(Platform.DOUYIN);
-  const [mode, setMode] = useState<'rewrite' | 'create'>('create');
-  const [topic, setTopic] = useState('');
+  // 使用 useLocalStorage 持久化用户输入和配置
+  const [topic, setTopic] = useLocalStorage<string>('app_script_input', '');
+  const [platform, setPlatform] = useLocalStorage<Platform>('app_script_platform', Platform.DOUYIN);
+  const [mode, setMode] = useLocalStorage<'rewrite' | 'create'>('app_script_mode', 'create');
+  const [selectedPersonaId, setSelectedPersonaId] = useLocalStorage<string>('app_script_persona_id', '');
+  
+  // 临时状态，不需要持久化
   const [result, setResult] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // 当 initialPersona 传入时，更新选中的 persona（优先级高于 localStorage）
+  useEffect(() => {
+    if (initialPersona?.id) {
+      setSelectedPersonaId(initialPersona.id);
+    }
+  }, [initialPersona?.id, setSelectedPersonaId]);
 
   const platforms = Object.values(Platform);
 
