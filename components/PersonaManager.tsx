@@ -43,8 +43,11 @@ export const PersonaManager: React.FC<PersonaManagerProps> = ({ personas, setPer
       setPersonas(prev => [...prev, newPersona]);
       setIsCreating(false);
       resetForm();
-    } catch (err) {
-      setError("Failed to create persona. Please check your API key and connection.");
+    } catch (err: any) {
+      // 显示更详细的错误信息
+      const errorMessage = err?.message || "Failed to create persona. Please check your API key and connection.";
+      console.error("Create persona error:", err);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

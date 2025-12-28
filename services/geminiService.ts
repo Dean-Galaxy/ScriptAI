@@ -8,8 +8,10 @@ const getAI = (): GoogleGenAI => {
   if (!ai) {
     const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      throw new Error("API Key is not configured. Please set GEMINI_API_KEY in your environment variables.");
+      console.error("API Key check failed. process.env.API_KEY:", process.env.API_KEY, "process.env.GEMINI_API_KEY:", process.env.GEMINI_API_KEY);
+      throw new Error("API Key 未配置。请在环境变量中设置 GEMINI_API_KEY，或在 GitHub Pages 部署时配置 Secrets。");
     }
+    console.log("Initializing GoogleGenAI with API key (length:", apiKey.length, ")");
     ai = new GoogleGenAI({ apiKey });
   }
   return ai;
@@ -46,9 +48,14 @@ export const analyzePersona = async (
   try {
     const aiInstance = getAI();
     
+    // 检测图片 MIME 类型
+    const mimeType = imageDataUrl.startsWith('data:image/png') ? 'image/png' : 
+                     imageDataUrl.startsWith('data:image/jpeg') || imageDataUrl.startsWith('data:image/jpg') ? 'image/jpeg' :
+                     'image/jpeg'; // 默认为 jpeg
+
     const imagePart = {
       inlineData: {
-        mimeType: 'image/jpeg', // Assuming jpeg/png handling
+        mimeType: mimeType,
         data: cleanBase64(imageDataUrl),
       },
     };
@@ -59,8 +66,9 @@ export const analyzePersona = async (
     
     Extract their style profile according to the system instructions.`;
 
+    // 调用 Gemini API
     const response = await aiInstance.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: {
         parts: [imagePart, { text: prompt }]
       },
@@ -93,9 +101,17 @@ export const analyzePersona = async (
       rawAnalysisText: jsonText
     };
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Persona Analysis Error:", error);
-    throw new Error("Failed to analyze persona. Please try again.");
+    // 提供更详细的错误信息
+    const errorMessage = error?.message || error?.toString() || "Unknown error";
+    if (errorMessage.includes("API Key") || errorMessage.includes("apiKey")) {
+      throw new Error("API Key 未配置或无效。请检查环境变量 GEMINI_API_KEY。");
+    }
+    if (errorMessage.includes("network") || errorMessage.includes("fetch")) {
+      throw new Error("网络连接失败。请检查您的网络连接。");
+    }
+    throw new Error(`创建角色失败: ${errorMessage}`);
   }
 };
 
@@ -157,8 +173,9 @@ export const generateScript = async (
     Please generate the full response following the standard output format.
     `;
 
+    // 调用 Gemini API 生成脚本
     const response = await aiInstance.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         systemInstruction: SCRIPT_SYSTEM_PROMPT
